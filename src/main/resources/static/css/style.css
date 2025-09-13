@@ -368,4 +368,60 @@ h1.h4, .h4 {
   padding: 2px;           /* grosor del aro */
   box-shadow: 0 0 0 1px rgba(255,255,255,.6); /* delineado suave sobre bg oscuro */
   display: block;
+  
+}
+/* === Login oscuro tipo “glass” === */
+.login-page, .login-page body { min-height: 100vh; }
+.login-page {
+  color: #e6e6e6;
+  background:
+    radial-gradient(600px 300px at 80% 10%, rgba(117, 161, 232, 0.25), transparent 60%),
+    radial-gradient(500px 400px at 10% 80%, rgba(16,185,129,.25), transparent 60%),
+    radial-gradient(400px 400px at 60% 70%, rgba(236,72,153,.22), transparent 60%),
+    radial-gradient(1200px 800px at 10% 10%, #839ccd, #05070c 50%, #7e90f0 100%);
+  background-attachment: fixed;
+  display: grid;
+  place-items: center;
+}
+
+/* Tarjeta con efecto vidrio */
+.login-page .card {
+  background: rgba(28, 83, 224, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Inputs y selects oscuros */
+.login-page .form-control, 
+.login-page .form-control:focus, 
+.login-page .form-select {
+  color: #e9eefc;
+  background-color: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.login-page .form-control::placeholder { color: #a9b0c6; }
+
+/* Botón principal */
+.login-page .btn-primary {
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  border: 0;
+  box-shadow: 0 8px 20px rgba(37,99,235,.35);
+}
+.login-page .btn-primary:hover { filter: brightness(1.05); }
+
+/* Link pequeño */
+.login-page .small-link { color:#93c5fd; text-decoration:none; }
+.login-page .small-link:hover { text-decoration: underline; }
+/* Título "Admin · Cusco Store" dentro de la tarjeta */
+.login-page .card h1 {
+  color: #e2e8f0;           /* gris muy claro */
+}
+
+/* Etiquetas "Usuario" y "Contraseña" */
+.login-page .form-label {
+  color: #cbd5e1;           /* gris claro */
+  font-weight: 600;         /* (opcional) un poco más grueso */
 }

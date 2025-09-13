@@ -1,27 +1,6 @@
 // ==== API base ====
 const API = '/api';
 
-// ==== Reset de historial en recarga de página
-/*(function resetHistorialOnReload() {
-  try {
-    const navEntry = performance.getEntriesByType?.('navigation')?.[0];
-    const isReload = navEntry ? (navEntry.type === 'reload')
-                              : (performance?.navigation?.type === 1); // fallback antiguo
-
-    if (isReload) {
-      // Borra todas las variantes de claves que puedas estar usando
-      localStorage.removeItem('orders');      
-      localStorage.removeItem('pedidos');     
-      localStorage.removeItem('facturas');     
-      localStorage.removeItem('lastOrderId'); 
-     
-      console.info('[reset] Historial de pedidos y facturas limpiado por recarga.');
-    }
-  } catch (e) {
-    console.warn('[reset] No se pudo evaluar el tipo de navegación:', e);
-  }
-})(); */
-
 // === Estado y helpers de categorías (FRONT) ===
 const state = { productos: [], cat: 'Todas', q: '' };
 
@@ -38,7 +17,6 @@ function renderTabs(cats) {
     </li>
   `).join('');
 
-  // delegación: un solo handler para todos los botones
   ul.onclick = (e) => {
     const btn = e.target.closest('button[data-cat]');
     if (!btn) return;
@@ -84,6 +62,7 @@ function escapeHTML(str) {
     .replaceAll(">", "&gt;").replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
+
 // ==== Productos: cargar / buscar desde el backend ====
 async function cargarProductos() {
   const sp = document.getElementById('loading');
@@ -96,11 +75,9 @@ async function cargarProductos() {
     if (!r.ok) throw new Error('API /products no disponible');
     const productos = await r.json();
 
-    // 👇 Nuevo: guardamos todo y construimos tabs
     state.productos = productos;
     renderTabs(categoriasUnicas(productos));
 
-    // Arranca mostrando "Todas" (cámbialo por 'Abarrotes' si prefieres)
     state.cat = 'Todas';
     applyFilters('', state.cat);
   } catch (e) {
@@ -111,33 +88,27 @@ async function cargarProductos() {
     sp && (sp.hidden = true);
   }
 }
-// Click en tarjetas de categoría (filtra productos por categoría)
+
+// Click en tarjetas de categoría (filtra por categoría)
 document.addEventListener('click', (e) => {
   const card = e.target.closest('.cat-card[data-cat-link]');
   if (!card) return;
   e.preventDefault();
 
-  // 1) fijar categoría activa
-  const cat = card.dataset.catLink;          // "Abarrotes" | "Juguetería" | "Oficina"
+  const cat = card.dataset.catLink; // "Abarrotes" | "Juguetería" | "Oficina"
   state.cat = cat;
 
-  // 2) aplicar filtros con la búsqueda actual (state.q)
   applyFilters(state.q, state.cat);
 
-  // 3) marcar activo el tab correspondiente (si existe el #cat-tabs)
   const tabs = document.getElementById('cat-tabs');
   if (tabs) {
     [...tabs.querySelectorAll('button[data-cat]')]
       .forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
   }
 
-  // 4) hacer scroll suave a la lista de productos
   document.getElementById('lista-productos')
     ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
-
-
-
 
 async function buscarProductos(q) {
   try {
@@ -160,6 +131,7 @@ function renderProductos(productos) {
           <h5 class="card-title">${escapeHTML(p.name || '')}</h5>
           <p class="card-text">S/ ${Number(p.price ?? 0).toFixed(2)} — Stock: ${p.stock ?? 0}</p>
           <button class="btn btn-primary w-100 add-to-cart"
+                  data-id="${p.id}"
                   data-nombre="${escapeHTML(p.name || '')}"
                   data-precio="${Number(p.price ?? 0)}"
                   data-img="${escapeHTML(p.imageUrl || 'img/placeholder.png')}"
@@ -172,19 +144,17 @@ function renderProductos(productos) {
   `).join('');
 }
 
-
 // === Checkout: impuestos/envío/cupón ===
 const TAX_RATE = 0.18;
-const SHIPPING_DELIVERY = 10.00;
+const SHIPPING_DELIVERY = 0.00;
 const SHIPPING_RECOJO = 0.00;
 let envioActual = SHIPPING_DELIVERY;
 let descuentoActual = 0;
 
 function calcularDesglose() {
- 
   const sub = typeof totalMontoSeleccionado === "function" ? totalMontoSeleccionado() : totalMonto();
   const igv = sub * TAX_RATE;
-  const total = sub + igv + envioActual - descuentoActual;
+  const total = sub + envioActual - descuentoActual;
   return { sub, igv, envio: envioActual, descuento: descuentoActual, total: Math.max(total, 0) };
 }
 function aplicarCupon(code) {
@@ -194,9 +164,7 @@ function aplicarCupon(code) {
 
 // === FAB Carrito (creación y actualización) ===
 function createCartFAB() {
-  // No mostrar FAB en la página de carrito
   if (location.pathname.endsWith("carrito.html")) return;
-
   if (document.getElementById("cart-fab")) return; // evita duplicados
   const a = document.createElement("a");
   a.id = "cart-fab";
@@ -217,7 +185,7 @@ function pulseFAB() {
   const fab = document.getElementById("cart-fab");
   if (!fab) return;
   fab.classList.remove("pulse");
-  void fab.offsetWidth;           // reflow para reiniciar animación
+  void fab.offsetWidth; // reflow para reiniciar animación
   fab.classList.add("pulse");
 }
 
@@ -233,26 +201,31 @@ function pintarBadge() {
 }
 
 // ==== Carrito: operaciones ====
-function agregar(nombre, precio, img, seller) {
-  const prod = carrito.find(p => p.nombre === nombre);
+// (ahora acepta id también)
+function agregar(id, nombre, precio, img, seller) {
+  let prod = null;
+  if (id != null) prod = carrito.find(p => p.id === id);
+  if (!prod)     prod = carrito.find(p => p.nombre === nombre);
+
   if (prod) {
     prod.cantidad += 1;
-    // completa datos si viniera de versiones anteriores
-    if (!prod.img) prod.img = img || "img/placeholder.png";
+    if (!prod.img)    prod.img = img || "img/placeholder.png";
     if (!prod.seller) prod.seller = seller || "MiTienda";
     if (typeof prod.selected === "undefined") prod.selected = true;
+    if (prod.id == null && id != null) prod.id = id; // completa id si faltaba
   } else {
     carrito.push({
+      id: id ?? null,
       nombre,
       precio: +precio,
       cantidad: 1,
       img: img || "img/placeholder.png",
       seller: seller || "MiTienda",
-      selected: true     // por defecto marcado
+      selected: true
     });
   }
   save(); pintarBadge(); pulseFAB();
-  pintarLista(); // para refrescar si estamos en carrito
+  pintarLista(); // refresca si estamos en carrito
 }
 
 function eliminar(nombre) {
@@ -377,37 +350,28 @@ function totalMontoSeleccionado() {
 }
 
 function actualizarTotalesSeleccion() {
-  // Desglose con IGV + envío - descuento, usando los seleccionados
   const { sub, igv, envio, descuento, total } = calcularDesglose();
 
-  // Total en barra inferior (muestra el total final)
   const totalBar = $("#totalResumen");
   if (totalBar) totalBar.textContent = PEN.format(total);
 
-  // Fallback (por si tienes otro total visible)
   const totalEl = $("#total");
   if (totalEl) totalEl.textContent = PEN.format(total);
 
-  // Si existen labels de desglose, los actualizamos
   const el = (id) => document.getElementById(id);
   el("subtotal") && (el("subtotal").textContent = PEN.format(sub));
   el("igv") && (el("igv").textContent = PEN.format(igv));
   el("envio") && (el("envio").textContent = PEN.format(envio));
   el("descuento") && (el("descuento").textContent = `- ${PEN.format(descuento)}`);
 
-  // Contador “(n seleccionados)”
   const seleccionados = countSelected();
   const selCount = $("#selCount");
   if (selCount) selCount.textContent = `(${seleccionados} seleccionado${seleccionados === 1 ? "" : "s"})`;
 
-  // Habilitar/deshabilitar botón “Continuar compra” y “Pagar ahora”
   const btnComprar = $("#comprar");
   if (btnComprar) btnComprar.disabled = seleccionados === 0;
 
-  // Sincroniza el “Seleccionar todos”
   actualizarSelectAll();
-
-  // Badge + live region
   pintarBadge();
 }
 
@@ -417,7 +381,7 @@ document.addEventListener("change", (e) => {
     const checked = e.target.checked;
     carrito.forEach(i => i.selected = checked);
     save();
-    pintarLista();               // re-render
+    pintarLista();
     actualizarTotalesSeleccion();
   }
 });
@@ -444,7 +408,6 @@ function generarOrderId() {
 }
 
 function buildOrderSummary() {
-  // 1) Items seleccionados
   const itemsSel = carrito.filter(i => i.selected !== false);
   const tbody = document.getElementById("invBody");
   if (tbody) {
@@ -468,7 +431,6 @@ function buildOrderSummary() {
     });
   }
 
-  // 2) Totales
   const { sub, igv, envio, descuento, total } = calcularDesglose();
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   set("invSub", PEN.format(sub));
@@ -477,7 +439,6 @@ function buildOrderSummary() {
   set("invDesc", `- ${PEN.format(descuento)}`);
   set("invTotal", PEN.format(total));
 
-  // 3) Datos del cliente / entrega
   const nombre = document.getElementById("nombre")?.value?.trim() || "—";
   const email  = document.getElementById("email")?.value?.trim() || "—";
   const recojo = document.getElementById("entregaRecojo")?.checked;
@@ -493,7 +454,6 @@ function buildOrderSummary() {
   billEmail && (billEmail.textContent = email);
   billEntrega && (billEntrega.textContent = entregaTxt);
 
-  // 4) Método de pago (texto)
   const metodo = document.getElementById("pagoMetodo")?.value || "tarjeta";
   let pagoStr = metodoPagoLabel(metodo);
   if (metodo === "visa" || metodo === "mastercard") {
@@ -504,7 +464,6 @@ function buildOrderSummary() {
     if (cel) pagoStr += ` (${cel})`;
   }
 
-  // 5) ID de pedido
   const orderId = document.getElementById("orderId");
   orderId && (orderId.textContent = generarOrderId());
 }
@@ -519,7 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// ===== Helpers de pedidos/facturas =====
+// ===== Helpers de pedidos/facturas (local) =====
 function getSelectedItems() {
   return carrito.filter(i => i.selected !== false).map(i => ({
     nombre: i.nombre,
@@ -536,7 +495,6 @@ function crearPedido() {
   const items = getSelectedItems();
   const id = generarOrderId();
 
-  // Datos cliente/entrega
   const nombre = document.getElementById("nombre")?.value?.trim() || "";
   const email  = document.getElementById("email")?.value?.trim() || "";
   const telefono = document.getElementById("telefono")?.value?.trim() || "";
@@ -546,7 +504,6 @@ function crearPedido() {
   const ref    = document.getElementById("referencia")?.value?.trim()|| "";
   const entregaTxt = recojo ? "Recojo en tienda" : [dir, dist, ref].filter(Boolean).join(" · ");
 
-  // Pago
   const metodo = document.getElementById("pagoMetodo")?.value || "tarjeta";
   let pagoStr = metodoPagoLabel(metodo);
   if (metodo === "visa" || metodo === "mastercard" || metodo === "tarjeta") {
@@ -579,7 +536,6 @@ function guardarPedido(pedido) {
   const arr = JSON.parse(localStorage.getItem(key)) || [];
   arr.push(pedido);
   localStorage.setItem(key, JSON.stringify(arr));
-  // También guardamos el último pedido para cargarlo directo en factura.html
   localStorage.setItem("lastOrderId", pedido.id);
 }
 
@@ -589,13 +545,14 @@ document.addEventListener("DOMContentLoaded", () => {
   createCartFAB();
   updateCartFAB();
 
-  // TIENDA: botones "Agregar" (con data-img y data-seller)
+  // TIENDA: botones "Agregar" (con data-id, data-img y data-seller)
   document.body.addEventListener("click", (e) => {
     const btn = e.target.closest(".add-to-cart");
     if (!btn) return;
-    const { nombre, precio, img, seller } = btn.dataset;
+    const { id, nombre, precio, img, seller } = btn.dataset;
     if (!nombre || isNaN(parseFloat(precio))) return;
-    agregar(nombre, parseFloat(precio), img, seller);
+    const pid = id ? Number(id) : null;
+    agregar(pid, nombre, parseFloat(precio), img, seller);
   });
 
   // CARRITO: botones y modal
@@ -633,7 +590,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const link = e.target.closest("[data-cat-link]");
     if (!link) return;
     e.preventDefault();
-    const dest = link.getAttribute("data-cat-link"); // ej: "#abarrotes"
+    const dest = link.getAttribute("data-cat-link");
     const secciones2 = document.querySelectorAll(".categoria");
     secciones2.forEach(sec => (sec.style.display = "none"));
     const objetivo = document.querySelector(dest);
@@ -644,33 +601,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ====== Navegación de pasos (1: carrito, 2: datos, 3: pago) ======
-  let paso = 1; // estado
+  // ====== Pasos (1: carrito, 2: datos, 3: pago) ======
+  let paso = 1;
 
   const seccionDatos = document.getElementById("checkoutDatos");
   const seccionPago  = document.getElementById("checkoutPago");
   const btnContinuar = document.getElementById("btnContinuar");
   const pagoMetodo   = document.getElementById("pagoMetodo");
   const tarjetaWrap  = document.getElementById("tarjetaWrapper");
-  const yapeWrapper  = document.getElementById("yapeWrapper"); // NUEVO
+  const yapeWrapper  = document.getElementById("yapeWrapper");
 
-  // Mostrar/ocultar secciones y botones según el paso
   function renderPaso() {
     const btnPagarNow = document.getElementById("comprar");
     if (!btnContinuar || !btnPagarNow) return;
 
     if (paso === 1) {
-      // Solo carrito visible (secciones ocultas)
       seccionDatos && seccionDatos.classList.add("d-none");
       seccionPago  && seccionPago.classList.add("d-none");
       btnContinuar.classList.remove("d-none");
       btnPagarNow.classList.add("d-none");
-
-      // Continuar habilitado solo si hay seleccionados
       btnContinuar.disabled = (countSelected() === 0);
     }
     if (paso === 2) {
-      // Mostrar datos
       seccionDatos && seccionDatos.classList.remove("d-none");
       seccionPago  && seccionPago.classList.add("d-none");
       btnContinuar.classList.remove("d-none");
@@ -678,7 +630,6 @@ document.addEventListener("DOMContentLoaded", () => {
       btnPagarNow.classList.add("d-none");
     }
     if (paso === 3) {
-      // Mostrar pago
       seccionDatos && seccionDatos.classList.remove("d-none");
       seccionPago  && seccionPago.classList.remove("d-none");
       btnContinuar.classList.add("d-none");
@@ -686,7 +637,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Validación mínima de Paso 2 (nombre+email+T&C)
   function validarPaso2() {
     const nombre = document.getElementById("nombre");
     const email  = document.getElementById("email");
@@ -698,7 +648,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return okCar && okNom && okEm && okTyC;
   }
 
-  // Entrega: toggles y costo
   const rDelivery = document.getElementById("entregaDelivery");
   const rRecojo   = document.getElementById("entregaRecojo");
   const dirWrap   = document.getElementById("direccionWrapper");
@@ -710,20 +659,17 @@ document.addEventListener("DOMContentLoaded", () => {
       envioActual = SHIPPING_DELIVERY;
       if (dirWrap) dirWrap.style.display = "";
     }
-    actualizarTotalesSeleccion(); // refresca total en barra
+    actualizarTotalesSeleccion();
   }
   if (rDelivery) rDelivery.addEventListener("change", toggleEntregaUI);
   if (rRecojo)   rRecojo.addEventListener("change",  toggleEntregaUI);
   toggleEntregaUI();
 
-  // Continuar → avanza de paso
   if (btnContinuar) {
     btnContinuar.addEventListener("click", () => {
       if (paso === 1) {
-        // Ir a datos
         paso = 2; renderPaso();
       } else if (paso === 2) {
-        // Validar datos antes de ir a pago
         if (!validarPaso2()) {
           alert("Completa nombre, email y acepta términos para continuar.");
           return;
@@ -733,7 +679,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Método de pago: mostrar/ocultar campos según opción (Visa/MasterCard/Yape/Plin/Efectivo)
   if (pagoMetodo) {
     const togglePaymentUI = () => {
       const val = pagoMetodo.value;
@@ -743,16 +688,15 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (val === "yape" || val === "plin") {
         tarjetaWrap && tarjetaWrap.classList.add("d-none");
         yapeWrapper && yapeWrapper.classList.remove("d-none");
-      } else { // efectivo
+      } else {
         tarjetaWrap && tarjetaWrap.classList.add("d-none");
         yapeWrapper && yapeWrapper.classList.add("d-none");
       }
     };
     pagoMetodo.addEventListener("change", togglePaymentUI);
-    togglePaymentUI(); // estado inicial
+    togglePaymentUI();
   }
 
-  // Cupón en Paso 3
   const btnCupon = document.getElementById("aplicarCupon");
   const inputCupon = document.getElementById("cuponInput");
   if (btnCupon && inputCupon) {
@@ -765,7 +709,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // VALIDACIÓN según método antes de pagar + CREAR/GUARDAR pedido + redirigir a factura
+  // Pagar ahora → crea pedido local y redirige a factura
   if (btnComprar) {
     btnComprar.addEventListener("click", () => {
       if (countSelected() === 0) return;
@@ -785,20 +729,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Construye el resumen (si usas modal de previsualización)
       buildOrderSummary();
-
-      // Crea y guarda el pedido en historial
       const pedido = crearPedido();
       guardarPedido(pedido);
 
-      // Limpia carrito y redirige a la factura imprimible
       vaciar();
       location.href = `factura.html?id=${encodeURIComponent(pedido.id)}`;
     });
   }
 
-  // Confirmación final (si usaras modal en vez de redirección)
+  // Confirmación final (si usaras modal)
   const btnConfirmar = $("#confirmarCompra");
   if (btnConfirmar) {
     btnConfirmar.addEventListener("click", () => {
@@ -810,11 +750,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-  // Al final de tu DOMContentLoaded existente:
+
   if (location.pathname.endsWith('tienda.html')) {
-  cargarProductos();
+    cargarProductos();
   }
 
-  // Render inicial de paso
   renderPaso();
 });

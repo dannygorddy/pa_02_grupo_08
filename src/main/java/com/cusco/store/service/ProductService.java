@@ -3,33 +3,61 @@ package com.cusco.store.service;
 import com.cusco.store.domain.Product;
 import com.cusco.store.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class ProductService {
-  private final ProductRepository repo;
 
-  public ProductService(ProductRepository repo) { this.repo = repo; }
+    private final ProductRepository repo;
 
-  public List<Product> list() { return repo.findAll(); }
+    public ProductService(ProductRepository repo) {
+        this.repo = repo;
+    }
 
-  public List<Product> search(String q) {
-    return (q == null || q.isBlank()) ? repo.findAll() : repo.findByNameContainingIgnoreCase(q);
-  }
+    // ===== Lecturas =====
+    @Transactional(readOnly = true)
+    public List<Product> findAll() {
+        return repo.findAll();
+    }
 
-  public Product create(Product p) { return repo.save(p); }
+    @Transactional(readOnly = true)
+    public Product get(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Product " + id + " not found"));
+    }
 
-  public Product update(Long id, Product p) {
-    Product cur = repo.findById(id).orElseThrow();
-    cur.setName(p.getName());
-    cur.setPrice(p.getPrice());
-    cur.setStock(p.getStock());
-    cur.setImageUrl(p.getImageUrl());
-    cur.setCategory(p.getCategory());
-    return repo.save(cur);
-  }
+    @Transactional(readOnly = true)
+    public List<Product> searchByName(String q) {
+        if (q == null || q.isBlank()) return findAll();
+        return repo.findByNameContainingIgnoreCase(q.trim()); // usa tu método del repo
+    }
 
-  public void delete(Long id) { repo.deleteById(id); }
+    // ===== Escrituras =====
+    @Transactional
+    public Product create(Product p) {
+        return repo.save(p);
+    }
+
+    @Transactional
+    public Product update(Long id, Product p) {
+        Product cur = get(id); // valida existencia o lanza NoSuchElementException
+        cur.setName(p.getName());
+        cur.setCategory(p.getCategory());
+        cur.setPrice(p.getPrice());
+        cur.setStock(p.getStock());
+        cur.setDescription(p.getDescription());
+        cur.setImageUrl(p.getImageUrl());
+        return repo.save(cur);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        if (!repo.existsById(id)) {
+            throw new NoSuchElementException("Product " + id + " not found");
+        }
+        repo.deleteById(id);
+    }
 }
-
