@@ -1,6 +1,6 @@
 :root{
-  --brand-green:#1d8223;
-  --brand-green-dark:#388E3C;
+--brand-green:#07afa1;
+  --brand-green-dark:#09bb92;
   --brand-bg-light:#f5f7f5;
 }
 
@@ -8,14 +8,101 @@
    Base
    ========================= */
 body{
+  font-family: "Montserrat", sans-serif;
   background-color:var(--brand-bg-light);
   color:#222;
   padding-bottom: 72px; /* para que la barra fija no tape contenido en mobile */
 }
-
+.marquee-container {
+  background-color: #016f7b;
+  color: white;
+  padding: 10px 0;
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  top: 50%;
+  left: 0;
+  z-index: 9999;
+  transform: translateY(-50%);
+}
 button:focus, a:focus, input:focus {
   outline: 2px solid #222;
   outline-offset: 2px;
+}
+.marquee-text {
+  white-space: nowrap;
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+  animation: marquee 10s linear infinite;
+}
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+main{
+    width: 100vw;
+    height: auto;
+}
+button {
+ position: relative;
+ overflow: hidden;
+ outline: none;
+ cursor: pointer;
+ border-radius: 50px;
+ background-color: hsl(173, 98%, 35%);
+ border: solid 4px hsl(192, 100%, 15%);
+ font-family: inherit;
+}
+.default-btn,.hover-btn {
+ background-color: hsl(184, 99%, 28%);
+ display: -webkit-box;
+ display: -moz-box;
+ display: -ms-flexbox;
+ display: -webkit-flex;
+ display: flex;
+ align-items: center;
+ gap: 15px;
+ padding: 15px 20px;
+ border-radius: 50px;
+ font-size: 17px;
+ font-weight: 500;
+ text-transform: uppercase;
+ transition: all .3s ease;
+}
+
+.hover-btn {
+ position: absolute;
+ inset: 0;
+ background-color: hsl(182, 94%, 27%);
+ transform: translate(0%,100%);
+}
+
+.default-btn span {
+ color: hsl(0, 0%, 100%);
+}
+
+.hover-btn span {
+ color: hsl(50deg 100% 50%);
+}
+
+button:hover .default-btn {
+ transform: translate(0%,-100%);
+}
+
+button:hover .hover-btn {
+ transform: translate(0%,0%);
+}
+/* =========================
+   BOTON DE LLAMDO END
+   ========================= */
+
+.container_text_2{
+  font-size: 4rem;
 }
 
 /* =========================
@@ -28,15 +115,148 @@ button:focus, a:focus, input:focus {
 .btn-primary,.btn-success{ background-color:var(--brand-green); border-color:var(--brand-green); }
 .btn-primary:hover,.btn-success:hover{ background-color:var(--brand-green-dark); border-color:var(--brand-green-dark); }
 
-footer{ background-color:var(--brand-green); color:#fff; }
+.footer {
+  background-color: #013837;
+  color: white;
+  padding: 60px;
+  font-family: Arial, sans-serif;
+}
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.footer-logo {
+  flex-basis: 25%;
+  text-align: center;
+}
 
+.footer-logo a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+}
+.footer-logo img {
+  margin-right: 10px;
+}
+
+.footer-logo .logo-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.footer-nav {
+  flex-basis: 30%;
+}
+
+.footer-nav h5 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.footer-nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.footer-nav li {
+  margin-bottom: 10px;
+}
+
+.footer-nav a {
+  text-decoration: none;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.footer-nav a:hover {
+  text-decoration: underline;
+}
+
+.footer-nav .badge {
+  background-color: #17a2b8;
+  border-radius: 50%;
+  padding: 5px 10px;
+}
+
+.footer-contact {
+  flex-basis: 30%;
+}
+
+.footer-contact h5 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.footer-contact a {
+  text-decoration: none;
+  color: white;
+  font-size: 1.1rem;
+}
+.footer-social {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+.social-icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+  transition: transform 0.3s;
+}
+
+.social-icon:hover {
+  transform: scale(1.1);
+}
+
+footer .text-md-left {
+  text-align: left;
+}
+
+.footer-terms {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.footer-terms a {
+  text-decoration: none;
+  color: white;
+}
+
+.footer-terms a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-logo,
+  .footer-nav,
+  .footer-contact,
+  .footer-social {
+    flex-basis: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .footer-social {
+    margin-top: 10px;
+  }
+}
 /* =========================
    Tarjetas de categorías
    ========================= */
 .cat-grid{ margin-top:.5rem; }
 .cat-card{
+  
   display:block;
-  background:#fff;
+  background:#ffffff;
   border-radius:16px;
   padding:22px 18px;
   text-align:center;
@@ -67,12 +287,14 @@ footer{ background-color:var(--brand-green); color:#fff; }
    Cards / Imágenes de producto
    ========================= */
 .card {
+  
   border-radius: 14px;
   border: 1px solid rgba(0,0,0,.06);
   box-shadow: 0 8px 22px rgba(0,0,0,.06);
 }
 
 .producto img,.card-img-top{
+  background-color: #1d8223;
   width:100%;
   height:220px;
   object-fit:contain;     /* evita recorte (dino completo) */
@@ -360,16 +582,14 @@ h1.h4, .h4 {
   #modalCompra .modal-content { border: 0; box-shadow: none; }
 }
 .brand-logo {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;     /* redondo */
-  object-fit: cover;      /* llena el círculo sin deformar */
-  background: #fff;       /* aro blanco sutil */
-  padding: 2px;           /* grosor del aro */
-  box-shadow: 0 0 0 1px rgba(255,255,255,.6); /* delineado suave sobre bg oscuro */
+  width: auto;
+  height: 80px; 
+  object-fit: cover;    
+  padding: 2px;           
   display: block;
   
 }
+  
 /* === Login oscuro tipo “glass” === */
 .login-page, .login-page body { min-height: 100vh; }
 .login-page {
@@ -422,6 +642,6 @@ h1.h4, .h4 {
 
 /* Etiquetas "Usuario" y "Contraseña" */
 .login-page .form-label {
-  color: #cbd5e1;           /* gris claro */
+  color: #064694;           /* gris claro */
   font-weight: 600;         /* (opcional) un poco más grueso */
 }

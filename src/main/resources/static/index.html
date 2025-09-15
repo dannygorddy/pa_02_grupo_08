@@ -11,9 +11,8 @@
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
-        <img src="images/logo.jpg" alt="Logo de Cusco Store" class="brand-logo" width="32" height="32">
-        <span>Cusco Store</span>
+      <a class="navbar-brand d-flex align-items-center " href="index.html">
+        <img src="images/LOGO CUSCO STORE (1).svg" alt="Logo de Cusco Store" class="brand-logo">
       </a>
       <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
         <span class="navbar-toggler-icon"></span>
@@ -26,7 +25,7 @@
             <a class="nav-link" href="carrito.html">Carrito <span class="badge bg-info" id="badgeCarrito">0</span></a>
           </li>
             <li class="nav-item">
-    <a class="nav-link" href="/admin.html" title="Panel de administración">🔒 Admin</a>
+    <a class="nav-link" href="/admin.html" title="Panel de administración">Admin.</a>
   </li>
 
         </ul>
@@ -34,14 +33,29 @@
     </div>
   </nav>
 
-  <header class="py-5 text-center bg-light">
-    <div class="container">
-      <h1 class="display-5 fw-bold">¡Calidad y ahorro para que tu bolsillo sonría!</h1>
+  <header class="py-5 text-center bg-light" >
+    <div class="container_text_1 container">
+      <h1 class="display-5 fw-bold"><span class="container_text_2">¡Calidad y ahorro </span><br> para que tu bolsillo sonría!</h1>
       <p class="lead text-muted">Encuentra abarrotes, juguetes y artículos de oficina en un solo lugar.</p>
-      <a class="btn btn-primary btn-lg" href="tienda.html">Ir a la Tienda</a>
+      <button onclick="location.href='tienda.html'">
+        <div class="default-btn">
+          <svg class="css-i6dzq1" stroke-linejoin="round" stroke-linecap="round" fill="none" stroke-width="2" stroke="#FFF" height="20" width="20" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle r="3" cy="12" cx="12"></circle></svg>
+          <span >Ver Tienda</span>
+        </div>
+        <div class="hover-btn">
+          <svg class="css-i6dzq1" stroke-linejoin="round" stroke-linecap="round" fill="none" stroke-width="2" stroke="#ffd300" height="20" width="20" viewBox="0 0 24 24"><circle r="1" cy="21" cx="9"></circle><circle r="1" cy="21" cx="20"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span >Ir a Tienda</span>
+        </div>
+      </button>
     </div>
   </header>
-
+  <!-------========= CINTA DE DESCUENTO STAR =========------->
+  <section class="cinta">
+    <div class="marquee-container">
+      <p class="marquee-text">¡Aprovecha nuestros descuentos de hasta el 50%! | Precios de calidad, solo en Cusco Store | ¡No te lo pierdas!</p>
+    </div>
+  </section>
+    <!-------========= CINTA DE DESCUENTO END =========------->
   <main class="container my-5">
     <div class="row g-4">
       <div class="col-md-4">
@@ -76,11 +90,63 @@
       </div>
     </div>
   </main>
+<!-------========= FOOTER START =========------->
+<footer class="footer">
+  <div class="footer-container">
+    <!-- Logo de Cusco Store -->
+    <div class="footer-logo">
+      <a href="index.html">
+        <img src="images/LOGO CUSCO STORE (1).svg" alt="Logo Cusco Store" width="300">
+      </a>
+      <small>© 2025 Cusco Store - Todos los derechos reservados</small>
+    </div>
 
-  <footer class="py-4 bg-dark text-center text-white">
-    <small>© 2025 Cusco Store</small>
-  </footer>
+    <!-- Enlaces de navegación -->
+    <div class="footer-nav">
+              <h5>Navegación</h5>
+       <ul>
+        <li><a href="index.html"><i class="fas fa-home"></i> Inicio</a></li>
+        <li><a href="tienda.html"><i class="fas fa-store"></i> Tienda</a></li>
+        <li><a href="carrito.html"><i class="fas fa-shopping-cart"></i> Carrito</a></li>
+        <li><a href="admin.html"><i class="fas fa-lock"></i> Admin</a></li>
+      </ul>
+    </div>
 
+    <!-- Información de contacto -->
+    <div class="footer-contact">
+      <h5>Contacto</h5>
+      <p><strong>Atención al Cliente:</strong></p>
+      <p><a href="tel:+51987654321">+51 987 654 321</a></p>
+      <p><a href="mailto:soporte@cuscostore.com">soporte@cuscostore.com</a></p>
+    </div>
+
+    <!-- Redes sociales -->
+    <div class="footer-social">
+      <h5>Síguenos</h5>
+      <div class="social_media">
+      <a href="https://facebook.com/CuscoStore">
+        <img src="images/icon-facebook.svg" alt="Facebook" class="social-icon">
+      </a>
+      <a href="https://instagram.com/CuscoStore">
+        <img src="images/icon-instagram.svg" alt="Instagram" class="social-icon">
+      </a>
+      <a href="https://wa.me/51987654321">
+        <img src="images/icon-whatsapp.svg" alt="WhatsApp" class="social-icon">
+      </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Términos y condiciones, política de privacidad -->
+  <div class="footer-terms">
+    <small>
+      <a href="terminos.html">Términos y condiciones</a> | 
+      <a href="politica.html">Política de Privacidad</a>
+    </small>
+  </div>
+</footer>
+<!-------========= FOOTER END =========------->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/script.js"></script>
 </body>
