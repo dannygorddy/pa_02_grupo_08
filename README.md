@@ -5,6 +5,7 @@
 ---
 
 ## 👥 Integrantes – Grupo 08
+
 - **Danny Gorddy Huaman Chavez**  
 - **Joan Quintana Rosales**  
 - **Issac Curitomay**  
@@ -111,6 +112,3 @@ Incluye: catálogo, carrito de compras, checkout y emisión de factura.
 - `data.sql` → Productos semilla para pruebas.  
 
 ---
-
-## 📂 Estructura del Proyecto (resumen)
-
