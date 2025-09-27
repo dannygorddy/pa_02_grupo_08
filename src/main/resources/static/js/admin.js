@@ -1,7 +1,7 @@
 // ===== Config =====
 const API_BASE    = window.location.origin; // http://localhost:8081
 const PUBLIC_PATH = '/api/products';        // listar/buscar
-const ADMIN_PATH  = '/api/products';        // CRUD real (crear/editar/eliminar)
+const ADMIN_PATH  = '/api/admin/products';        // CRUD real (crear/editar/eliminar)
 
 // ===== Helpers UI =====
 const $  = (s) => document.querySelector(s);

@@ -26,8 +26,7 @@ public class SecurityConfig {
   public WebSecurityCustomizer webSecurityCustomizer() {
     return (web) -> web.ignoring()
         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()) // /css/**, /js/**, /images/**, /webjars/**, favicon
-        .requestMatchers("/img/**") // tu carpeta de logos/imagenes personalizadas
-        .requestMatchers("/h2-console/**");
+        .requestMatchers("/img/**"); // tu carpeta de logos/imagenes personalizadas
   }
 
   @Bean
@@ -58,9 +57,6 @@ public class SecurityConfig {
         .permitAll()
       )
       .logout(l -> l.logoutUrl("/logout").logoutSuccessUrl("/login.html?logout").permitAll());
-
-    // (opcional) para H2 console en iframes
-    http.headers(h -> h.frameOptions(f -> f.disable()));
 
     return http.build();
   }
