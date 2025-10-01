@@ -111,4 +111,28 @@ Incluye: catálogo, carrito de compras, checkout y emisión de factura.
 - `application.properties` → Puerto, H2, JPA, consola.  
 - `data.sql` → Productos semilla para pruebas.  
 
+
+### 🗄️ Capa de Persistencia (MySQL 8 + Spring Data JPA)
+
+- **Descripción**
+  - La capa de persistencia se implementó sobre **MySQL 8**, aportando **rendimiento** (índices y planes de ejecución optimizables), **integridad** (claves foráneas y restricciones) y **reproducibilidad** (scripts de inicialización).
+  - Se organiza con **Spring Data JPA (Hibernate 6)** y **HikariCP** como pool de conexiones.
+
+- **Anclaje al proyecto**
+  - **Motor:** contenedor definido en `docker-compose.yml` (MySQL 8 con BD `cuscostore`).
+  - **Driver:** dependencia `mysql-connector-j` en `pom.xml`.
+  - **Conexión:** `application.properties` con JDBC URL, `DB_USER` y `DB_PASS`.
+  - **JPA:** `spring.jpa.hibernate.ddl-auto=none` (esquema controlado) y `spring.sql.init.mode=always` (carga `schema.sql` y `data.sql`).
+  - **Buenas prácticas:** `spring.jpa.open-in-view=false`, **paginación** y **proyecciones** en repositorios para reducir I/O.
+
+- **Tablas y relaciones**
+  - **`product`**: `id` (PK), `name`, `description`, `category`, `price`, `stock`, `image_url`.
+    - **Índices:** `idx_product_name`, `idx_product_category`.
+  - **`orders`**: `id` (PK), `customer_name`, `email`, `total`, `created_at` (según esquema).
+  - **`order_item`**: `id` (PK), `order_id` (FK → `orders.id`), `product_id` (FK → `product.id`), `qty`, `unit_price`.
+    - **Integridad referencial** mediante FKs; **fetch LAZY** en relaciones para evitar N+1 en listados.
+
+- **Resultado**
+  - Operaciones **CRUD** consistentes y transaccionales; lecturas que **escalan** con **índices + paginación**; y entorno **replicable** para todo el equipo gracias a Docker y **scripts SQL** versionados.
+
 ---
